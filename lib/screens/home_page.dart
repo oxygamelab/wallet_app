@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:wallet_app/providers/card_provider.dart';
+import 'package:wallet_app/widgets/card_list.dart';
+import '../models/transaction_model.dart';
+import '../screens/add_card.dart';
+import '../widgets/transaction_view.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -8,9 +14,12 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
+    Provider.of<CardProvider>(context).initialState();
+
     return Scaffold(
       backgroundColor: Color.fromRGBO(238, 241, 242, 1),
       appBar: AppBar(
+        brightness: Brightness.light,
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -19,10 +28,15 @@ class _HomePageState extends State<HomePage> {
             color: Colors.black,
           ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Color.fromRGBO(238, 241, 242, 1),
         actions: [
           IconButton(
-            onPressed: () => print('add card..'),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => AddCard(),
+              ),
+            ),
             icon: Icon(
               Icons.add,
               color: Colors.black45,
@@ -32,124 +46,77 @@ class _HomePageState extends State<HomePage> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(20.0),
+          padding: EdgeInsets.symmetric(vertical: 20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                height: 210.0,
-                child: AspectRatio(
-                  aspectRatio: 3.1 / 2,
-                  child: GestureDetector(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black87,
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(20.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      width: 40.0,
-                                      height: 40.0,
-                                      decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.red.withOpacity(.8)),
-                                    ),
-                                    Transform.translate(
-                                      offset: Offset(-15.0, 0),
-                                      child: Container(
-                                        width: 40.0,
-                                        height: 40.0,
-                                        decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color:
-                                                Colors.orange.withOpacity(.8)),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      '23000',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 30.0,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      ' US',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 15.0,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  child: Text(
-                                    'MasterCard',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 15.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 15.0),
-                                FittedBox(
-                                  fit: BoxFit.contain,
-                                  child: Text(
-                                    '1234 1234 1234 1234',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20.0,
-                                      letterSpacing: 10.0,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+              Provider.of<CardProvider>(context).getCardLength() > 0
+                  ? Container(
+                      height: 210.0,
+                      child: Consumer<CardProvider>(
+                        builder: (context, cards, widget) => CardList(
+                          cards: cards.allCards,
                         ),
                       ),
+                    )
+                  /* CardView(
+                      card: CardModel(
+                          available: 1000,
+                          currency: 'US',
+                          name: 'MasterCard',
+                          number: '1234 **** **** 1234'),
+                    ) */
+                  : Container(
+                      margin: EdgeInsets.symmetric(horizontal: 20.0),
+                      width: double.infinity,
+                      height: 210.0,
+                      decoration: BoxDecoration(
+                        color: Colors.black12,
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Add your new card',
+                            style: TextStyle(
+                              color: Colors.black38,
+                            ),
+                          ),
+                          SizedBox(height: 10.0),
+                          Icon(
+                            Icons.add_circle_outline,
+                            color: Colors.black38,
+                            size: 36.0,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ),
-              ),
               SizedBox(height: 30.0),
-              Text(
-                'Last Transactions',
-                style: TextStyle(
-                  color: Colors.black45,
-                  fontSize: 15.0,
-                  fontWeight: FontWeight.bold,
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.0),
+                child: Column(
+                  children: [
+                    Text(
+                      'Last Transactions',
+                      style: TextStyle(
+                        color: Colors.black45,
+                        fontSize: 15.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 15.0),
+                    TransactionView(
+                      trans: TransactionModel(
+                          type: '-', price: 1200, name: 'Shopping'),
+                    ),
+                    TransactionView(
+                      trans:
+                          TransactionModel(type: '+', price: 900, name: 'Work'),
+                    ),
+                  ],
                 ),
-              ),
-              SizedBox(height: 10.0),
-              Container(
-                padding: EdgeInsets.all(20.0),
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                child: Text('asd'),
               ),
             ],
           ),
